@@ -1,0 +1,1 @@
+import{z as e,C as t}from"./index-51WLfY-V.js";const c={listDepartments:()=>e.get("/erp/departments",{cacheTtl:t.MEDIUM}),listDepartmentProjects:s=>e.get(`/erp/departments/${s}/projects`,{cacheTtl:t.MEDIUM}),listProjects:(s={})=>e.get("/erp/projects",{params:s,cacheTtl:t.MEDIUM}),listEmployees:()=>e.get("/staff",{cacheTtl:t.MEDIUM})};export{c as e};

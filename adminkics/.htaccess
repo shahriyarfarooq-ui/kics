@@ -1,0 +1,17 @@
+<IfModule mod_rewrite.c>
+  
+RewriteEngine On
+RewriteBase /adminkics/
+# If the request already targets /public/ redirect to the same path without /public/
+RewriteCond %{THE_REQUEST} \s/public/ [NC]
+RewriteRule ^public/(.*)$ /adminkics/$1 [L,R=301]
+
+# If the request is for an existing file or directory, serve it directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Internally rewrite everything else to public/
+RewriteRule ^(.*)$ public/$1 [L,NC]
+
+</IfModule>

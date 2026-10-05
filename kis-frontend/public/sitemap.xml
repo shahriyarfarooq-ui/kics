@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+    <!-- ======================================== -->
+    <!-- MAIN PAGES -->
+    <!-- ======================================== -->
+    
+    <url>
+        <loc>https://kics.edu.pk/</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>https://kics.edu.pk/about</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.80</priority>
+    </url>
+    
+    <url>
+        <loc>https://kics.edu.pk/director-message</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.80</priority>
+    </url>
+
+    <!-- ======================================== -->
+    <!-- RESEARCH & TECHNOLOGY -->
+    <!-- ======================================== -->
+    
+    <url>
+        <loc>https://kics.edu.pk/research-areas</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.80</priority>
+    </url>
+    
+    <url>
+        <loc>https://kics.edu.pk/research</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.70</priority>
+    </url>
+    
+    <url>
+        <loc>https://kics.edu.pk/research-projects</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.70</priority>
+    </url>
+    
+    <url>
+        <loc>https://kics.edu.pk/technology-centers</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.70</priority>
+    </url>
+
+    <!-- ======================================== -->
+    <!-- KICS DEPARTMENTS (Formerly ERP) -->
+    <!-- ======================================== -->
+    
+    <url>
+        <loc>https://kics.edu.pk/kics-departments</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.80</priority>
+    </url>
+
+    <!-- ======================================== -->
+    <!-- STAFF & EMPLOYEES -->
+    <!-- ======================================== -->
+    
+    <url>
+        <loc>https://kics.edu.pk/kics-employees</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.70</priority>
+    </url>
+
+    <!-- ======================================== -->
+    <!-- PUBLICATIONS -->
+    <!-- ======================================== -->
+    
+    <url>
+        <loc>https://kics.edu.pk/publications</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.70</priority>
+    </url>
+
+    <!-- ======================================== -->
+    <!-- EVENTS -->
+    <!-- ======================================== -->
+    
+    <url>
+        <loc>https://kics.edu.pk/events</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.80</priority>
+    </url>
+    
+    <url>
+        <loc>https://kics.edu.pk/events/calendar</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.60</priority>
+    </url>
+
+    <!-- ======================================== -->
+    <!-- CONFERENCES & WORKSHOPS -->
+    <!-- ======================================== -->
+    
+    <url>
+        <loc>https://kics.edu.pk/conferences</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.70</priority>
+    </url>
+    
+    <url>
+        <loc>https://kics.edu.pk/workshops</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.70</priority>
+    </url>
+    
+    <url>
+        <loc>https://kics.edu.pk/icosst</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.60</priority>
+    </url>
+
+    <!-- ======================================== -->
+    <!-- CAREERS -->
+    <!-- ======================================== -->
+    
+    <url>
+        <loc>https://kics.edu.pk/jobs</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.70</priority>
+    </url>
+
+    <!-- ======================================== -->
+    <!-- NEWS -->
+    <!-- ======================================== -->
+    
+    <url>
+        <loc>https://kics.edu.pk/news</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.80</priority>
+    </url>
+    
+    <url>
+        <loc>https://kics.edu.pk/kics-newsletter</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.50</priority>
+    </url>
+
+    <!-- ======================================== -->
+    <!-- INNOVATION & SERVICES -->
+    <!-- ======================================== -->
+    
+    <url>
+        <loc>https://kics.edu.pk/innovation</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.60</priority>
+    </url>
+    
+    <url>
+        <loc>https://kics.edu.pk/services</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.60</priority>
+    </url>
+
+    <!-- ======================================== -->
+    <!-- CONTACT -->
+    <!-- ======================================== -->
+    
+    <url>
+        <loc>https://kics.edu.pk/contact</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.70</priority>
+    </url>
+
+    <!-- ======================================== -->
+    <!-- LEGACY REDIRECTS (for SEO) -->
+    <!-- ======================================== -->
+    
+    <url>
+        <loc>https://kics.edu.pk/staff</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.50</priority>
+    </url>
+    
+    <url>
+        <loc>https://kics.edu.pk/erp-departments</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.40</priority>
+    </url>
+    
+    <url>
+        <loc>https://kics.edu.pk/erp-employees</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.40</priority>
+    </url>
+    
+</urlset>

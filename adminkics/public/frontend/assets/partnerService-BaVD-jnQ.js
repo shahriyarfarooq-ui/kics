@@ -1,0 +1,1 @@
+import{z as t,C as a}from"./index-51WLfY-V.js";const p={list:(r={})=>t.get("/api/partners",{params:r,unwrap:!0,cacheTtl:a.LONG}),get:r=>t.get(`/api/partners/${r}`,{unwrap:!0,cacheTtl:a.LONG})};export{p};

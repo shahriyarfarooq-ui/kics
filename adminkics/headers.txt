@@ -1,0 +1,39 @@
+HTTP/1.1 302 Found
+Date: Thu, 02 Jul 2026 09:23:53 GMT
+Content-Type: text/html; charset=utf-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+Server: cloudflare
+Nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+Location: http://kics.uet.edu.pk/web/login?redirect=http%3A%2F%2Fkics.uet.edu.pk%2Fweb_api%2Fget_employees
+Set-Cookie: session_id=aa13c6692d9e9d795e7e75823bc4c9b1032bd740; Expires=Wed, 30-Sep-2026 09:23:53 GMT; Max-Age=7776000; HttpOnly; Path=/
+Cf-Cache-Status: DYNAMIC
+Report-To: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=pTcIB6ulCYUl9HLI%2FKO%2Bfo9lT5xGjlG%2FdHZPlmtyZKSOgveT0%2FmbLr8heeNJBrcyFZWkg14ZpnM7PCWpqiFPpHB0s8NOZD7vzCevTuzUbSLoM7GUOdLnq1RCFlm7e43UTX8%3D"}]}
+CF-RAY: a14c9821eb9b9d24-SIN
+
+HTTP/1.1 301 Moved Permanently
+Date: Thu, 02 Jul 2026 09:23:54 GMT
+Content-Type: text/html; charset=UTF-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+Location: https://kics.uet.edu.pk/web/login?redirect=http%3A%2F%2Fkics.uet.edu.pk%2Fweb_api%2Fget_employees
+Report-To: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=ZpU4CubOUthWiUiieBoM3R83uqf54T7vw41IB0fR5PGrF14wXvGxPXC6zh7gQ%2B4a2gyqMFPTasJvlLxuvrhMaaeH1vr4rz9Ix4Gk9AtyyGVgLzrTiBHIGKjFa3mSe8McgSc%3D"}]}
+Nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+Server: cloudflare
+CF-RAY: a14c9827292d4090-SIN
+
+HTTP/1.1 200 OK
+Date: Thu, 02 Jul 2026 09:23:55 GMT
+Content-Type: text/html; charset=utf-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+Server: cloudflare
+Nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+X-Frame-Options: DENY
+Set-Cookie: frontend_lang=en_US; Path=/
+Set-Cookie: session_id=a368784fc2c92fec13f41cace00b7027d1b49383; Expires=Wed, 30-Sep-2026 09:23:55 GMT; Max-Age=7776000; HttpOnly; Path=/
+Report-To: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=3vXQJA0z3WWXgFJQT7hgUPnBdS3P86qq9daJf5DhCrRlyG9IBgU56EWvsWPxk%2F%2BqGoHTDXeQelXwtPWDLY3UkvWCrdGh%2F%2FrkI8p39gJ%2Bm4vslNRje7NAqo2zoDdMjKq%2BJ1g%3D"}]}
+Cf-Cache-Status: DYNAMIC
+Vary: accept-encoding
+CF-RAY: a14c982899599d24-SIN
+
