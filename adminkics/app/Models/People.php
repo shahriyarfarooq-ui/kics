@@ -17,12 +17,17 @@ class People extends Model
         'url_name', 'user_id', 'designation_id', 'group_id', 'post_id',
         'title', 'fname', 'lname', 'url', 'email', 'off_no', 'ext', 'cell_no',
         'fax_no', 'image_name', 'seqno', 'biography', 'research_interest',
-        'status', 'is_core_team'
+        'about_me', 'education', 'achievements', 'certifications', 'publications',
+        'work_experience', 'projects', 'profile_photo_path', 'linkedin_url',
+        'github_url', 'website_url', 'profile_visible', 'profile_edit_locked',
+        'profile_updated_at', 'status', 'is_core_team'
     ];
 
     // Add casts for boolean fields
     protected $casts = [
-        'is_core_team' => 'boolean'
+        'is_core_team' => 'boolean',
+        'profile_visible' => 'boolean',
+        'profile_edit_locked' => 'boolean',
     ];
 
     // Relationships

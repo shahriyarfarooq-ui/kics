@@ -46,7 +46,7 @@
                                         </ul>
                                     </div>
                                 @endif
-                                <form method="POST" action="{{ route('login.submit') }}" class="form-horizontal">
+                                <form method="POST" action="{{ route(($loginType ?? 'staff') === 'admin' ? 'admin.login.submit' : 'staff.login.submit') }}" class="form-horizontal">
                                     @csrf
                                     <div class="mb-3">
                                         <label class="form-label" for="email">Email</label>
@@ -68,10 +68,11 @@
                                         <button class="btn btn-primary w-100" type="submit">Log In</button>
                                     </div>
                                 </form>
-                                <div class="mt-3 text-center text-muted small">
-                                    <!--<p class="mb-1">Total registered users: <strong>{{ $totalUsers }}</strong></p>-->
-                                    <!--<p class="mb-0">Demo login: <strong>admin@example.com</strong> / <strong>password</strong></p>-->
-                                </div>
+                                @if(isset($totalUsers))
+                                    <div class="mt-3 text-center text-muted small">
+                                        <p class="mb-1">Total registered users: <strong>{{ $totalUsers }}</strong></p>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>

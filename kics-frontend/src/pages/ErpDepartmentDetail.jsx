@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
-import { FiArrowLeft, FiAlertCircle, FiUsers, FiFolder } from 'react-icons/fi';
+import { FiArrowLeft, FiAlertCircle, FiUsers, FiFolder, FiLayers, FiUser } from 'react-icons/fi';
 import PageHero from '../components/PageHero';
 import AnimateOnScroll from '../components/AnimateOnScroll';
 import SEO from '../components/SEO';
 import { erpService } from '../services';
+import { buildImageUrl } from '../utils/image';
 
 const mapProject = (project) => ({
   id: project.id ?? project.kics_id,
@@ -14,6 +15,15 @@ const mapProject = (project) => ({
   state: project.project_states || 'Unknown',
   type: project.project_type || 'Unknown',
 });
+
+const mapDepartment = (item) => item ? ({
+  ...item,
+  id: item.id ?? item.kics_id,
+  name: item.web_department_name || item.name || item.complete_name || 'Unnamed Department',
+  code: item.dept_code || 'N/A',
+  logoUrl: buildImageUrl(item.logo, ''),
+  coverUrl: buildImageUrl(item.cover_image || item.logo, ''),
+}) : null;
 
 export default function ErpDepartmentDetail() {
   const { id } = useParams();
@@ -25,24 +35,7 @@ export default function ErpDepartmentDetail() {
   const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState('projects'); // 'projects' or 'staff'
 
-  const normalizeDepartmentValue = (value = '') =>
-    String(value)
-      .toLowerCase()
-      .replace(/lab(?:oratory)?/g, '')
-      .replace(/[^a-z0-9]/g, '')
-      .trim();
-
-  const departmentMatchesEmployee = (employee) => {
-    if (!department || !employee?.department) return false;
-    const normalizedEmployee = normalizeDepartmentValue(employee.department);
-    const matchValues = [department.name, department.code, department.campus]
-      .filter(Boolean)
-      .map(normalizeDepartmentValue);
-
-    return matchValues.some((value) => value && normalizedEmployee.includes(value));
-  };
-
-  const departmentStaff = employees.filter(departmentMatchesEmployee);
+  const departmentStaff = employees;
 
   useEffect(() => {
     let active = true;
@@ -52,9 +45,10 @@ export default function ErpDepartmentDetail() {
         setLoading(true);
         setError('');
 
-        const [projectData, employeeData] = await Promise.all([
+        const [projectData, employeeData, departmentData] = await Promise.all([
           erpService.listDepartmentProjects(id),
-          erpService.listEmployees(),
+          erpService.listEmployees({ department_id: id }),
+          erpService.getDepartment(id),
         ]);
 
         if (!active) return;
@@ -71,13 +65,7 @@ export default function ErpDepartmentDetail() {
           throw new Error('Unexpected staff data format.');
         }
 
-        if (!department && location.state?.department) {
-          setDepartment(location.state.department);
-        }
-
-        if (!department) {
-          setDepartment({ id, name: `Department ${id}` });
-        }
+        setDepartment(mapDepartment(departmentData) || mapDepartment(location.state?.department) || { id, name: `Department ${id}` });
       } catch (err) {
         setError(
           err.status === 404
@@ -91,7 +79,7 @@ export default function ErpDepartmentDetail() {
 
     fetchResources();
     return () => { active = false; };
-  }, [id, location.state, department]);
+  }, [id, location.state]);
 
   return (
     <div>
@@ -105,6 +93,8 @@ export default function ErpDepartmentDetail() {
         title={department ? `${department.name} Projects` : 'ERP Department Projects'}
         subtitle="Explore the projects associated with the selected ERP department."
         breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'ERP Departments', to: '/kics-departments' }, { label: department?.name || 'Department' }]}
+        backgroundImage={department?.coverUrl || department?.logoUrl || undefined}
+        fallbackIcon={FiLayers}
       />
 
       <section className="py-16 bg-slate-50">
@@ -202,8 +192,17 @@ export default function ErpDepartmentDetail() {
                       {departmentStaff.map((employee, index) => (
                         <AnimateOnScroll key={employee.id || index}>
                           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
-                            <p className="text-xs uppercase tracking-[0.2em] text-primary-600 font-semibold mb-3">Staff</p>
-                            <h3 className="text-xl font-semibold text-slate-900 mb-3">{employee.complete_name || employee.name || 'Unnamed Staff'}</h3>
+                            <div className="mb-4 flex items-center gap-4">
+                              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-primary-600">
+                                {employee.profile?.image_path ? (
+                                  <img src={buildImageUrl(employee.profile.image_path)} alt="" className="h-full w-full object-cover" />
+                                ) : <FiUser size={28} aria-hidden="true" />}
+                              </div>
+                              <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-primary-600 font-semibold mb-1">Staff</p>
+                                <h3 className="text-lg font-semibold text-slate-900">{employee.complete_name || employee.name || 'Unnamed Staff'}</h3>
+                              </div>
+                            </div>
                             <div className="space-y-2 text-sm text-slate-600">
                               <p><span className="font-semibold text-slate-800">Designation:</span> {employee.job_title || employee.title || 'N/A'}</p>
                               <p><span className="font-semibold text-slate-800">Department:</span> {employee.department || 'N/A'}</p>
@@ -211,6 +210,11 @@ export default function ErpDepartmentDetail() {
                                 <p><span className="font-semibold text-slate-800">Email:</span> {employee.work_email || employee.email}</p>
                               ) : null}
                             </div>
+                            {employee.profile?.people_id && (
+                              <Link to={`/staff/${employee.profile.people_id}`} className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-700">
+                                View Profile
+                              </Link>
+                            )}
                           </div>
                         </AnimateOnScroll>
                       ))}

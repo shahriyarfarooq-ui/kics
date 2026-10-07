@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,7 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->appendToGroup('web', \App\Http\Middleware\EnsurePortalRole::class);
+        $middleware->redirectGuestsTo(function (Request $request) {
+            return $request->is('admin/*') || $request->is('admin-page')
+                ? route('admin.login')
+                : route('staff.login');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

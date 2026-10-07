@@ -88,7 +88,7 @@ export default function App() {
                 <Route path="/staff"             element={<Navigate to="/kics-employees" replace />} />
                 {/* Legacy /StaffPage path (case-insensitive links) */}
                 <Route path="/StaffPage"         element={<Navigate to="/kics-departments" replace />} />
-                <Route path="/staff/:id"          element={<Navigate to="/kics-departments" replace />} />
+                <Route path="/staff/:id"          element={<StaffDetail />} />
                 <Route path="/research-areas"    element={<ResearchAreas />} />
                 <Route path="/research-areas/:code" element={<ResearchAreaDetail />} />
                 <Route path="/publications"      element={<Publications />} />

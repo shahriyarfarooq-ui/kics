@@ -66,6 +66,13 @@
     </a>
 </li>
 
+<li class="menu-item">
+    <a class="menu-link waves-effect" href="{{ route('admin.page-heroes.edit') }}">
+        <span class="menu-icon"><i data-lucide="image"></i></span>
+        <span class="menu-text">Page Hero Images</span>
+    </a>
+</li>
+
         <!-- ====== ERP MANAGEMENT ====== -->
         <li class="menu-item">
             <a href="#menuErp" data-bs-toggle="collapse" class="menu-link waves-effect">

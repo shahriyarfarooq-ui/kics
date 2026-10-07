@@ -1,3 +1,5 @@
+import { API_BASE_URL } from '../services/api';
+
 export const DEFAULT_IMAGE_FALLBACK = 'https://placehold.co/600x400/4a1209/fae3de?text=KICS';
 
 const absoluteUrlPattern = /^(?:[a-z][a-z\d+\-.]*:)?\/\//i;
@@ -10,8 +12,7 @@ const encodeUrl = (url) => {
   }
 };
 
-// ✅ DIRECT FIX - Use the correct storage URL
-const STORAGE_BASE_URL = 'https://kics.edu.pk/web/adminkics/public/storage';
+const STORAGE_BASE_URL = `${API_BASE_URL.replace(/\/api\/?$/i, '')}/storage`;
 
 export const buildImageUrl = (value, fallback = DEFAULT_IMAGE_FALLBACK) => {
   if (value === null || value === undefined) return fallback;
@@ -29,8 +30,10 @@ export const buildImageUrl = (value, fallback = DEFAULT_IMAGE_FALLBACK) => {
 
   const normalized = image
     .replace(/\\/g, '/')
-    .replace(/^public\//i, '')
     .replace(/^storage\/app\/public\//i, '')
+    .replace(/^(?:(?:adminkics\/)?public\/)?storage\//i, '')
+    .replace(/^public\//i, '')
+    .replace(/^storage\//i, '')
     .replace(/^app\/public\//i, '');
 
   // Remove leading slashes

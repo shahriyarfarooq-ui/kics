@@ -1,8 +1,7 @@
 // api.js - A utility module for making API requests with caching and error handling.
-const DEFAULT_BASE_URL = 'https://kics.edu.pk/adminkics/public/api';
-
-//for local development, you can use the following base URL instead:
-// const DEFAULT_BASE_URL = 'http://localhost/kics/adminkics/public/api';
+const DEFAULT_BASE_URL = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost/kics/adminkics/public/api'
+  : 'https://kics.edu.pk/adminkics/public/api';
 
 const DEFAULT_CACHE_TTL = 5 * 60 * 1000;
 

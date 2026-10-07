@@ -6,6 +6,7 @@ import AnimateOnScroll from '../components/AnimateOnScroll';
 import SEO from '../components/SEO';
 import { staffService } from '../services';
 import { getImageLoadingProps } from '../utils/image';
+import { buildImageUrl } from '../utils/image';
 import { FiArrowLeft, FiMail, FiUser } from 'react-icons/fi';
 
 // Helper to strip HTML tags
@@ -22,10 +23,18 @@ const mapStaffMember = (item) => ({
   name: item.name || 'Unknown',
   title: item.designation || 'Staff Member',
   dept: item.department || 'Other',
-  bio: item.bio ? stripHtml(item.bio) : 'No biography available.',
+  bio: item.bio ? stripHtml(item.bio) : '',
   email: item.email || null,
-  image: item.image || null,
+  image: buildImageUrl(item.image_path || item.image, ''),
   researchInterest: item.research_interest ? stripHtml(item.research_interest) : null,
+  aboutMe: item.about_me ? stripHtml(item.about_me) : null,
+  education: item.education ? stripHtml(item.education) : null,
+  achievements: item.achievements ? stripHtml(item.achievements) : null,
+  certifications: item.certifications ? stripHtml(item.certifications) : null,
+  publications: item.publications ? stripHtml(item.publications) : null,
+  workExperience: item.work_experience ? stripHtml(item.work_experience) : null,
+  projects: item.projects ? stripHtml(item.projects) : null,
+  socialLinks: item.social_links || {},
 });
 
 export default function StaffDetail() {
@@ -78,6 +87,15 @@ export default function StaffDetail() {
   const title = person?.name || 'Staff Profile';
   const bio = person?.bio || '';
   const researchInterest = person?.researchInterest || '';
+  const profileSections = person ? [
+    ['About Me', person.aboutMe],
+    ['Education', person.education],
+    ['Achievements', person.achievements],
+    ['Certifications', person.certifications],
+    ['Publications', person.publications],
+    ['Work Experience', person.workExperience],
+    ['Projects', person.projects],
+  ].filter(([, value]) => value) : [];
 
   return (
     <div>
@@ -145,14 +163,26 @@ export default function StaffDetail() {
                         <FiMail size={14} /> {person.email}
                       </a>
                     )}
-                    <div className="prose prose-slate max-w-none mt-6 text-slate-600">
-                      <h2>Biography</h2>
-                      <p>{bio || 'Biography will be updated soon.'}</p>
+                    <div className="mt-8 space-y-6 text-slate-600">
+                      {bio && <section><h2 className="font-heading text-lg font-bold text-primary-900">Biography</h2><p className="mt-2 whitespace-pre-line">{bio}</p></section>}
                       {researchInterest && (
-                        <>
-                          <h2>Research Interests</h2>
-                          <p>{researchInterest}</p>
-                        </>
+                        <section><h2 className="font-heading text-lg font-bold text-primary-900">Research Interests</h2><p className="mt-2 whitespace-pre-line">{researchInterest}</p></section>
+                      )}
+                      {profileSections.map(([heading, value]) => (
+                        <section key={heading}>
+                          <h2 className="font-heading text-lg font-bold text-primary-900">{heading}</h2>
+                          <p className="mt-2 whitespace-pre-line">{value}</p>
+                        </section>
+                      ))}
+                      {Object.entries(person.socialLinks).some(([, value]) => value) && (
+                        <section>
+                          <h2 className="font-heading text-lg font-bold text-primary-900">Links</h2>
+                          <div className="mt-2 flex flex-wrap gap-3">
+                            {Object.entries(person.socialLinks).filter(([, value]) => value).map(([label, href]) => (
+                              <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold capitalize text-primary-700 underline hover:text-primary-500">{label}</a>
+                            ))}
+                          </div>
+                        </section>
                       )}
                     </div>
                   </div>

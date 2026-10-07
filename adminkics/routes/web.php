@@ -29,6 +29,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventApiController;
 use App\Http\Controllers\AnnouncementPopupController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PageHeroController;
 use App\Http\Controllers\UserController;
 use App\Models\Group;
 use App\Models\People;
@@ -47,12 +48,21 @@ Route::get('/employees', [EmployeeController::class, 'index']);
 Route::get('/departments', [DepartmentController::class, 'index']);
 Route::get('/departments/{department}/projects', [DepartmentController::class, 'projects'])->name('departments.projects');
 Route::get('/', function () {
-    return redirect()->route('login');
+    return redirect()->route('staff.login');
 });
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::get('/staff/login', [AuthController::class, 'showStaffLoginForm'])->name('staff.login');
+Route::post('/staff/login', [AuthController::class, 'loginStaff'])->name('staff.login.submit');
+Route::get('/admin/secure-login', [AuthController::class, 'showAdminLoginForm'])->name('admin.login');
+Route::post('/admin/secure-login', [AuthController::class, 'loginAdmin'])->name('admin.login.submit');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/staff/profile', [PeopleController::class, 'myProfile'])->name('staff.profile');
+    Route::post('/staff/profile', [PeopleController::class, 'updateProfile'])->name('staff.profile.update');
+});
 
 Route::get('admin-page', function () {
     return redirect()->route('admin.dashboard');
@@ -121,6 +131,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 
     Route::get('/announcement-popup', [AnnouncementPopupController::class, 'edit'])->name('admin.announcement-popup.edit');
     Route::put('/announcement-popup', [AnnouncementPopupController::class, 'update'])->name('admin.announcement-popup.update');
+    Route::get('/page-heroes', [PageHeroController::class, 'edit'])->name('admin.page-heroes.edit');
+    Route::put('/page-heroes', [PageHeroController::class, 'update'])->name('admin.page-heroes.update');
 });
 
 Route::prefix('admin/legacy')->name('admin.legacy.')->middleware('auth')->group(function () {
@@ -388,6 +400,7 @@ Route::prefix('api')->group(function () {
 
     // ===== ERP API =====
     Route::get('/erp/departments', [ErpApiController::class, 'departments']);
+    Route::get('/erp/departments/{id}', [ErpApiController::class, 'department']);
     Route::get('/erp/departments/{id}/projects', [ErpApiController::class, 'departmentProjects']);
     Route::get('/erp/projects', [ErpApiController::class, 'projects']);
     Route::get('/erp/employees', [ErpApiController::class, 'employees']);
@@ -405,6 +418,7 @@ Route::prefix('api')->group(function () {
     
     // ===== MENU SECTIONS API =====
     Route::get('/menu-sections', [MenuSectionController::class, 'apiIndex']);
+    Route::get('/page-heroes', [PageHeroController::class, 'apiIndex']);
 
     // ===== EVENTS API =====
     Route::get('/announcement-popup', [AnnouncementPopupController::class, 'show']);

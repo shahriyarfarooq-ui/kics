@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiSearch, FiChevronRight, FiAlertCircle } from 'react-icons/fi';
+import { FiSearch, FiChevronRight, FiAlertCircle, FiLayers } from 'react-icons/fi';
 import PageHero from '../components/PageHero';
 import AnimateOnScroll from '../components/AnimateOnScroll';
 import SEO from '../components/SEO';
 import { erpService } from '../services';
 import departmentsBanner from '../assets/images/kics-departments-banner.jpg';
+import { buildImageUrl } from '../utils/image';
 
 const departmentMapper = (item) => ({
   id: item.id ?? item.kics_id,
@@ -14,6 +15,8 @@ const departmentMapper = (item) => ({
   manager: item.manager || item.project_manager || 'N/A',
   campus: item.campus || 'N/A',
   projects: item.projects_count ?? item.projects?.length ?? 0,
+  logo: buildImageUrl(item.logo, ''),
+  coverImage: buildImageUrl(item.cover_image || item.logo, ''),
 });
 
 export default function ErpDepartments() {
@@ -114,6 +117,13 @@ export default function ErpDepartments() {
                 filtered.map((department) => (
                   <AnimateOnScroll key={department.id}>
                     <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-all">
+                      <div className="mb-5 flex h-36 items-center justify-center overflow-hidden rounded-2xl bg-slate-50">
+                        {department.logo ? (
+                          <img src={department.logo} alt={`${department.name} logo`} className="h-full w-full object-contain p-4" onError={(event) => { event.currentTarget.style.display = 'none'; }} />
+                        ) : (
+                          <FiLayers size={42} className="text-primary-500" aria-hidden="true" />
+                        )}
+                      </div>
                       <div>
                         <p className="text-xs uppercase tracking-[0.3em] text-primary-600 font-semibold">Lab</p>
                         <h2 className="mt-3 text-xl font-semibold text-slate-900">{department.name}</h2>

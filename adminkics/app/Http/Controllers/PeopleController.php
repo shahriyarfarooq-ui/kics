@@ -542,6 +542,7 @@ class PeopleController extends Controller
     public function destroy(People $person)
     {
         DB::beginTransaction();
+
         try {
             // Delete image if exists
             if ($person->image_name) {
@@ -550,15 +551,15 @@ class PeopleController extends Controller
                     @unlink($imagePath);
                 }
             }
-            
+
             // Detach labs first
             $person->labs()->detach();
-            
+
             // Delete the person
             $person->delete();
-            
+
             DB::commit();
-            
+
             // Check if request is AJAX
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
@@ -566,13 +567,12 @@ class PeopleController extends Controller
                     'message' => 'Person deleted successfully.'
                 ]);
             }
-            
+
             return redirect()->route('admin.staff.index')
                 ->with('success', 'Person deleted successfully.');
-                
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             // Check if request is AJAX
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
@@ -580,33 +580,43 @@ class PeopleController extends Controller
                     'message' => 'Error deleting person: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->route('admin.staff.index')
                 ->with('error', 'Error deleting person: ' . $e->getMessage());
         }
     }
-    
-public function apiStaff()
+
+    public function apiStaff()
 {
     $staff = People::with(['designation', 'group', 'post'])
-        ->where('status', 0) // only include staff with status 0
+        ->where('status', 0)
+        ->where('profile_visible', true)
         ->get()
         ->map(function ($person) {
-            // Check if the image file actually exists
-            $imagePath = $person->image_name 
-                ? storage_path('app/public/people/' . $person->image_name) 
-                : null;
+            $imagePath = $this->staffImagePath($person);
 
             return [
-                'id' => $person->people_id, // table PK
+                'id' => $person->people_id,
                 'name' => trim($person->fname . ' ' . $person->lname),
+                'email' => $person->email,
                 'bio' => strip_tags($person->biography),
                 'research_interest' => strip_tags($person->research_interest),
+                'about_me' => filled($person->about_me) ? strip_tags($person->about_me) : null,
+                'education' => filled($person->education) ? strip_tags($person->education) : null,
+                'achievements' => filled($person->achievements) ? strip_tags($person->achievements) : null,
+                'certifications' => filled($person->certifications) ? strip_tags($person->certifications) : null,
+                'publications' => filled($person->publications) ? strip_tags($person->publications) : null,
+                'work_experience' => filled($person->work_experience) ? strip_tags($person->work_experience) : null,
+                'projects' => filled($person->projects) ? strip_tags($person->projects) : null,
                 'designation' => $person->designation->designation_name ?? null,
                 'department' => $person->group->name ?? null,
-                'image' => $imagePath && file_exists($imagePath)
-                    ? asset('storage/people/' . $person->image_name)
-                    : asset('images/default-placeholder.png'), // fallback
+                'image' => $imagePath ? asset('public/storage/' . $imagePath) : null,
+                'image_path' => $imagePath,
+                'social_links' => array_filter([
+                    'linkedin' => $person->linkedin_url,
+                    'github' => $person->github_url,
+                    'website' => $person->website_url,
+                ], fn ($value) => filled($value)),
                 'bioLink' => '/biographies/' . $person->people_id,
             ];
         });
@@ -617,6 +627,7 @@ public function apiStaffById($id)
 {
     $person = People::with(['designation', 'group', 'post'])
         ->where('status', 0)
+        ->where('profile_visible', true)
         ->where('people_id', $id)
         ->first();
 
@@ -624,22 +635,57 @@ public function apiStaffById($id)
         return response()->json(['message' => 'Staff not found'], 404);
     }
 
-    $imagePath = $person->image_name 
-        ? storage_path('app/public/people/' . $person->image_name) 
-        : null;
+    $imagePath = $this->staffImagePath($person);
 
     return response()->json([
         'id' => $person->people_id,
         'name' => trim($person->fname . ' ' . $person->lname),
+        'email' => $person->email,
         'bio' => strip_tags($person->biography),
         'research_interest' => strip_tags($person->research_interest),
+        'about_me' => filled($person->about_me) ? strip_tags($person->about_me) : null,
+        'education' => filled($person->education) ? strip_tags($person->education) : null,
+        'achievements' => filled($person->achievements) ? strip_tags($person->achievements) : null,
+        'certifications' => filled($person->certifications) ? strip_tags($person->certifications) : null,
+        'publications' => filled($person->publications) ? strip_tags($person->publications) : null,
+        'work_experience' => filled($person->work_experience) ? strip_tags($person->work_experience) : null,
+        'projects' => filled($person->projects) ? strip_tags($person->projects) : null,
         'designation' => $person->designation->designation_name ?? null,
         'department' => $person->group->name ?? null,
-        'image' => $imagePath && file_exists($imagePath)
-            ? asset('storage/people/' . $person->image_name)
-            : asset('images/default-placeholder.png'),
+        'image' => $imagePath ? asset('public/storage/' . $imagePath) : null,
+        'image_path' => $imagePath,
+        'social_links' => array_filter([
+            'linkedin' => $person->linkedin_url,
+            'github' => $person->github_url,
+            'website' => $person->website_url,
+        ], fn ($value) => filled($value)),
         'bioLink' => '/biographies/' . $person->people_id,
     ]);
+}
+
+private function staffImagePath(People $person): ?string
+{
+    $profilePhoto = $person->profile_photo_path;
+    if ($profilePhoto) {
+        $relative = str_starts_with($profilePhoto, 'staff-profiles/')
+            ? $profilePhoto
+            : 'staff-profiles/' . basename($profilePhoto);
+
+        if (is_file(public_path('storage/' . $relative))) {
+            return $relative;
+        }
+    }
+
+    if ($person->image_name) {
+        $filename = basename($person->image_name);
+        foreach ([public_path('storage/people/' . $filename), storage_path('app/public/people/' . $filename)] as $path) {
+            if (is_file($path)) {
+                return 'people/' . $filename;
+            }
+        }
+    }
+
+    return null;
 }
 
 

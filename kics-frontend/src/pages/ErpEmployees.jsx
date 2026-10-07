@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { FiSearch, FiMail, FiAlertCircle, FiUser, FiBriefcase } from 'react-icons/fi';
 import PageHero from '../components/PageHero';
 import AnimateOnScroll from '../components/AnimateOnScroll';
 import SEO from '../components/SEO';
 import { erpService } from '../services';
 import employeesBanner from '../assets/images/kics-employees-banner.jpg';
+import { buildImageUrl } from '../utils/image';
 
 const mapEmployee = (employee) => ({
   id: employee.id,
@@ -13,8 +15,23 @@ const mapEmployee = (employee) => ({
   department: employee.department || 'General',
   email: employee.work_email || employee.email || '',
   bio: employee.bio || '',
-  image: employee.image || null,
+  image: buildImageUrl(employee.profile?.image_path || employee.image, ''),
+  profileId: employee.profile?.people_id || null,
 });
+
+function EmployeeAvatar({ image, name }) {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  return (
+    <div className="h-16 w-16 rounded-full bg-white border border-slate-100 overflow-hidden flex items-center justify-center text-primary-600 flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300">
+      {image && !imageFailed ? (
+        <img src={image} alt={name} className="h-full w-full object-cover" onError={() => setImageFailed(true)} />
+      ) : (
+        <FiUser size={28} aria-hidden="true" />
+      )}
+    </div>
+  );
+}
 
 const stripHtml = (html = '') => {
   if (typeof document === 'undefined') return html;
@@ -217,15 +234,7 @@ export default function ErpEmployees() {
                         <div>
                           <div className="flex items-center gap-4 mb-4">
                             {/* Avatar container */}
-                            <div className="h-16 w-16 rounded-full bg-white border border-slate-100 overflow-hidden flex items-center justify-center text-slate-400 flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300">
-                              {employee.image ? (
-                                <img src={employee.image} alt={employee.name} className="h-full w-full object-cover" />
-                              ) : (
-                                <div className="h-full w-full flex items-center justify-center bg-slate-100 text-primary-700 font-bold text-xl">
-                                  {employee.name.charAt(0)}
-                                </div>
-                              )}
-                            </div>
+                            <EmployeeAvatar image={employee.image} name={employee.name} />
                             <div>
                               <h3 className="text-base font-bold text-slate-900 group-hover:text-primary-600 transition-colors leading-snug">
                                 {employee.name}
@@ -253,14 +262,18 @@ export default function ErpEmployees() {
                           </div>
                         </div>
 
-                        {employee.email && (
-                          <div className="mt-4 pt-2">
-                            <a
-                              href={`mailto:${employee.email}`}
-                              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 transition-all shadow-sm"
-                            >
-                              <FiMail size={14} /> Email
-                            </a>
+                        {(employee.profileId || employee.email) && (
+                          <div className="mt-4 flex flex-col gap-2 pt-2">
+                            {employee.profileId && (
+                              <Link to={`/staff/${employee.profileId}`} className="w-full inline-flex items-center justify-center rounded-xl bg-primary-600 hover:bg-primary-700 px-4 py-2 text-xs font-semibold text-white transition-all shadow-sm">
+                                View Profile
+                              </Link>
+                            )}
+                            {employee.email && (
+                              <a href={`mailto:${employee.email}`} className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 transition-all shadow-sm">
+                                <FiMail size={14} /> Email
+                              </a>
+                            )}
                           </div>
                         )}
                       </div>
