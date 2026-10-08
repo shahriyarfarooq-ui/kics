@@ -23,6 +23,7 @@ export default function Workshops() {
         title="Workshops & Seminars"
         subtitle="Hands-on training, expert seminars, and professional development events at KICS."
         breadcrumbs={[{ label: 'Events' }, { label: 'Workshops' }]}
+        pageKey="workshops"
       />
 
       <section className="py-16 bg-white">

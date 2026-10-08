@@ -33,6 +33,13 @@ class Group extends Model
 
     public $timestamps = false;
 
+    protected $appends = ['name'];
+
+    public function getNameAttribute()
+    {
+        return $this->group_name;
+    }
+
     /* ----------------------------------------------------------
        🔗 Relationships
     ---------------------------------------------------------- */

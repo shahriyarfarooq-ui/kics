@@ -1,10 +1,8 @@
--- Back up the live database first, then select the Laravel database in phpMyAdmin
--- and run this script. It is based on kics_ssrlstaff.sql.
---
--- The dump already contains the ERP image/visibility columns, the employee
--- visibility column, and the events table. This script creates missing feature
--- tables and staff profile columns, then records applied schemas in Laravel's
--- migration ledger so Laravel does not try to recreate them.
+-- Backup the live database first.
+-- Then select the Laravel database in phpMyAdmin and run this script.
+-- This script creates missing feature tables and staff profile columns,
+-- then records them in Laravel's migration ledger so Laravel does not
+-- try to recreate them later.
 
 CREATE TABLE IF NOT EXISTS `announcement_popups` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -29,20 +27,48 @@ CREATE TABLE IF NOT EXISTS `page_hero_banners` (
 
 -- Staff-entered profile fields. Each column is added only if it is missing.
 SET @schema_name := DATABASE();
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='about_me')=0, 'ALTER TABLE `people` ADD COLUMN `about_me` LONGTEXT NULL', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='education')=0, 'ALTER TABLE `people` ADD COLUMN `education` LONGTEXT NULL', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='achievements')=0, 'ALTER TABLE `people` ADD COLUMN `achievements` LONGTEXT NULL', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='certifications')=0, 'ALTER TABLE `people` ADD COLUMN `certifications` LONGTEXT NULL', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='publications')=0, 'ALTER TABLE `people` ADD COLUMN `publications` LONGTEXT NULL', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='work_experience')=0, 'ALTER TABLE `people` ADD COLUMN `work_experience` LONGTEXT NULL', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='projects')=0, 'ALTER TABLE `people` ADD COLUMN `projects` LONGTEXT NULL', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='profile_photo_path')=0, 'ALTER TABLE `people` ADD COLUMN `profile_photo_path` VARCHAR(255) NULL', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='linkedin_url')=0, 'ALTER TABLE `people` ADD COLUMN `linkedin_url` VARCHAR(255) NULL', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='github_url')=0, 'ALTER TABLE `people` ADD COLUMN `github_url` VARCHAR(255) NULL', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='website_url')=0, 'ALTER TABLE `people` ADD COLUMN `website_url` VARCHAR(255) NULL', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='profile_visible')=0, 'ALTER TABLE `people` ADD COLUMN `profile_visible` TINYINT(1) NOT NULL DEFAULT 1', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='profile_edit_locked')=0, 'ALTER TABLE `people` ADD COLUMN `profile_edit_locked` TINYINT(1) NOT NULL DEFAULT 0', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='profile_updated_at')=0, 'ALTER TABLE `people` ADD COLUMN `profile_updated_at` TIMESTAMP NULL', 'SELECT 1'); PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='about_me')=0, 'ALTER TABLE `people` ADD COLUMN `about_me` LONGTEXT NULL', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='education')=0, 'ALTER TABLE `people` ADD COLUMN `education` LONGTEXT NULL', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='achievements')=0, 'ALTER TABLE `people` ADD COLUMN `achievements` LONGTEXT NULL', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='certifications')=0, 'ALTER TABLE `people` ADD COLUMN `certifications` LONGTEXT NULL', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='publications')=0, 'ALTER TABLE `people` ADD COLUMN `publications` LONGTEXT NULL', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='work_experience')=0, 'ALTER TABLE `people` ADD COLUMN `work_experience` LONGTEXT NULL', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='projects')=0, 'ALTER TABLE `people` ADD COLUMN `projects` LONGTEXT NULL', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='profile_photo_path')=0, 'ALTER TABLE `people` ADD COLUMN `profile_photo_path` VARCHAR(255) NULL', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='linkedin_url')=0, 'ALTER TABLE `people` ADD COLUMN `linkedin_url` VARCHAR(255) NULL', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='github_url')=0, 'ALTER TABLE `people` ADD COLUMN `github_url` VARCHAR(255) NULL', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='website_url')=0, 'ALTER TABLE `people` ADD COLUMN `website_url` VARCHAR(255) NULL', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='profile_visible')=0, 'ALTER TABLE `people` ADD COLUMN `profile_visible` TINYINT(1) NOT NULL DEFAULT 1', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='profile_edit_locked')=0, 'ALTER TABLE `people` ADD COLUMN `profile_edit_locked` TINYINT(1) NOT NULL DEFAULT 0', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @ddl := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=@schema_name AND table_name='people' AND column_name='profile_updated_at')=0, 'ALTER TABLE `people` ADD COLUMN `profile_updated_at` TIMESTAMP NULL', 'SELECT 1');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 SET @manual_migration_batch := (
     SELECT COALESCE(MAX(`batch`), 0) + 1

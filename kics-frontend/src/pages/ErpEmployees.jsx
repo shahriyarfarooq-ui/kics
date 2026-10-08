@@ -14,9 +14,11 @@ const mapEmployee = (employee) => ({
   title: employee.job_title || 'Staff Member',
   department: employee.department || 'General',
   email: employee.work_email || employee.email || '',
-  bio: employee.bio || '',
+  bio: employee.profile?.bio || employee.bio || '',
   image: buildImageUrl(employee.profile?.image_path || employee.image, ''),
   profileId: employee.profile?.people_id || null,
+  aboutMe: employee.profile?.about_me || employee.about_me || '',
+  education: employee.profile?.education || employee.education || '',
 });
 
 function EmployeeAvatar({ image, name }) {

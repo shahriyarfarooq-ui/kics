@@ -60,7 +60,10 @@ const PageHero = memo(function PageHero({ title, subtitle, breadcrumbs = [], bac
         if (ignore) return;
         const imagePath = payload?.[resolvedKey];
         if (imagePath) {
-          const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://kics.edu.pk/adminkics/public/api').replace(/\/+$/, '');
+          const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+          const baseUrl = (hostname === 'localhost' || hostname === '127.0.0.1')
+            ? 'http://localhost/kics/adminkics/public/api'
+            : (import.meta.env.VITE_API_BASE_URL || 'https://kics.edu.pk/adminkics/public/api');
           const base = baseUrl.replace(/\/api$/, '');
           const asset = imagePath.startsWith('http') ? imagePath : `${base}/storage/${imagePath.replace(/^\/+/, '')}`;
           setDbBackgroundImage(asset);
@@ -83,9 +86,10 @@ const PageHero = memo(function PageHero({ title, subtitle, breadcrumbs = [], bac
     <div
       className={`relative pt-20 pb-12 overflow-hidden border-b ${resolvedBackgroundImage ? 'bg-primary-950 border-primary-900' : 'bg-primary-50 border-primary-100'}`}
       style={resolvedBackgroundImage ? {
-        backgroundImage: `linear-gradient(90deg, rgba(5, 16, 38, 0.88), rgba(8, 28, 66, 0.72)), url("${resolvedBackgroundImage}")`,
-        backgroundSize: '100% 100%',
-        backgroundPosition: 'center 56%',
+        backgroundImage: `linear-gradient(90deg, rgba(5, 16, 38, 0.35), rgba(8, 28, 66, 0.18)), url("${resolvedBackgroundImage}")`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center center',
+        backgroundRepeat: 'no-repeat',
       } : undefined}
     >
       {!backgroundImage && <>

@@ -163,6 +163,7 @@ use App\Models\Designation;
 use App\Models\Group;
 use App\Models\KicPost;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -586,107 +587,241 @@ class PeopleController extends Controller
         }
     }
 
+    public function myProfile()
+    {
+        $user = Auth::user();
+
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        $person = People::where('user_id', $user->id)
+            ->orWhere('email', $user->email)
+            ->firstOrFail();
+
+        return view('staff.profile.edit', compact('person'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        $person = People::where('user_id', $user->id)
+            ->orWhere('email', $user->email)
+            ->firstOrFail();
+
+        if ($person->profile_edit_locked) {
+            return redirect()->back()->with('error', 'Profile editing has been locked by the admin.');
+        }
+
+        $validated = $request->validate([
+            'about_me' => ['nullable', 'string'],
+            'education' => ['nullable', 'string'],
+            'achievements' => ['nullable', 'string'],
+            'certifications' => ['nullable', 'string'],
+            'publications' => ['nullable', 'string'],
+            'work_experience' => ['nullable', 'string'],
+            'projects' => ['nullable', 'string'],
+            'linkedin_url' => ['nullable', 'url', 'max:255'],
+            'github_url' => ['nullable', 'url', 'max:255'],
+            'website_url' => ['nullable', 'url', 'max:255'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        $safeFields = [
+            'about_me', 'education', 'achievements', 'certifications',
+            'publications', 'work_experience', 'projects',
+            'linkedin_url', 'github_url', 'website_url',
+        ];
+
+        foreach ($safeFields as $field) {
+            $validated[$field] = $this->normalizeMultiLineItems($request->input($field));
+        }
+
+        if ($request->hasFile('profile_photo')) {
+            $directory = public_path('storage/staff-profiles');
+            if (! is_dir($directory)) {
+                mkdir($directory, 0755, true);
+            }
+
+            $file = $request->file('profile_photo');
+            $filename = Str::random(40) . '.' . ($file->guessExtension() ?: 'jpg');
+            $file->move($directory, $filename);
+            $validated['profile_photo_path'] = 'staff-profiles/' . $filename;
+        }
+
+        $oldProfilePhotoPath = $person->profile_photo_path;
+        $person->fill($validated);
+        $person->profile_updated_at = now();
+        $person->save();
+
+        if (! empty($validated['profile_photo_path']) && $oldProfilePhotoPath && $oldProfilePhotoPath !== $validated['profile_photo_path']) {
+            $this->deleteProfilePhoto($oldProfilePhotoPath);
+        }
+
+        return redirect()->route('staff.profile')->with('success', 'Your profile was updated successfully.');
+    }
+
+    private function normalizeMultiLineItems($value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $lines = is_array($value)
+            ? $value
+            : preg_split('/\r\n|\r|\n/', (string) $value);
+
+        $clean = [];
+
+        foreach ($lines as $line) {
+            $line = trim((string) $line);
+            $line = preg_replace('/^[-*•]\s*/u', '', $line);
+            $line = trim((string) $line);
+
+            if ($line === '') {
+                continue;
+            }
+
+            $clean[] = $line;
+        }
+
+        return $clean === [] ? null : implode("\n", $clean);
+    }
+
+    public function adminProfiles()
+    {
+        $people = People::orderBy('fname')->paginate(20);
+
+        return view('admin.staff-profiles', compact('people'));
+    }
+
+    public function toggleProfileVisibility(People $person)
+    {
+        $person->profile_visible = ! $person->profile_visible;
+        $person->save();
+
+        return redirect()->back()->with('success', 'Profile visibility updated.');
+    }
+
+    public function toggleProfileEditLock(People $person)
+    {
+        $person->profile_edit_locked = ! $person->profile_edit_locked;
+        $person->save();
+
+        return redirect()->back()->with('success', 'Profile editing permission updated.');
+    }
+
     public function apiStaff()
 {
-    $staff = People::with(['designation', 'group', 'post'])
-        ->where('status', 0)
-        ->where('profile_visible', true)
-        ->get()
-        ->map(function ($person) {
-            $imagePath = $this->staffImagePath($person);
+        $staff = People::with(['designation', 'group', 'post', 'user'])
+            ->where('status', 0)
+            ->where('profile_visible', true)
+            ->whereHas('user', function ($query) {
+                $query->where('role', 'staff');
+            })
+            ->get()
+            ->map(function ($person) {
+                $imagePath = $this->staffImagePath($person);
 
-            return [
-                'id' => $person->people_id,
-                'name' => trim($person->fname . ' ' . $person->lname),
-                'email' => $person->email,
-                'bio' => strip_tags($person->biography),
-                'research_interest' => strip_tags($person->research_interest),
-                'about_me' => filled($person->about_me) ? strip_tags($person->about_me) : null,
-                'education' => filled($person->education) ? strip_tags($person->education) : null,
-                'achievements' => filled($person->achievements) ? strip_tags($person->achievements) : null,
-                'certifications' => filled($person->certifications) ? strip_tags($person->certifications) : null,
-                'publications' => filled($person->publications) ? strip_tags($person->publications) : null,
-                'work_experience' => filled($person->work_experience) ? strip_tags($person->work_experience) : null,
-                'projects' => filled($person->projects) ? strip_tags($person->projects) : null,
-                'designation' => $person->designation->designation_name ?? null,
-                'department' => $person->group->name ?? null,
-                'image' => $imagePath ? asset('public/storage/' . $imagePath) : null,
-                'image_path' => $imagePath,
-                'social_links' => array_filter([
-                    'linkedin' => $person->linkedin_url,
-                    'github' => $person->github_url,
-                    'website' => $person->website_url,
-                ], fn ($value) => filled($value)),
-                'bioLink' => '/biographies/' . $person->people_id,
-            ];
-        });
+                return [
+                    'id' => $person->people_id,
+                    'name' => trim($person->fname . ' ' . $person->lname),
+                    'email' => $person->email,
+                    'bio' => strip_tags($person->biography),
+                    'research_interest' => strip_tags($person->research_interest),
+                    'about_me' => filled($person->about_me) ? strip_tags($person->about_me) : null,
+                    'education' => filled($person->education) ? strip_tags($person->education) : null,
+                    'achievements' => filled($person->achievements) ? strip_tags($person->achievements) : null,
+                    'certifications' => filled($person->certifications) ? strip_tags($person->certifications) : null,
+                    'publications' => filled($person->publications) ? strip_tags($person->publications) : null,
+                    'work_experience' => filled($person->work_experience) ? strip_tags($person->work_experience) : null,
+                    'projects' => filled($person->projects) ? strip_tags($person->projects) : null,
+                    'designation' => $person->designation->designation_name ?? null,
+                    'department' => $person->group->name ?? null,
+                    'image' => $imagePath ? asset('public/storage/' . $imagePath) : null,
+                    'image_path' => $imagePath,
+                    'social_links' => array_filter([
+                        'linkedin' => $person->linkedin_url,
+                        'github' => $person->github_url,
+                        'website' => $person->website_url,
+                    ], fn ($value) => filled($value)),
+                    'bioLink' => '/biographies/' . $person->people_id,
+                ];
+            });
 
-    return response()->json($staff);
-}
-public function apiStaffById($id)
-{
-    $person = People::with(['designation', 'group', 'post'])
-        ->where('status', 0)
-        ->where('profile_visible', true)
-        ->where('people_id', $id)
-        ->first();
-
-    if (!$person) {
-        return response()->json(['message' => 'Staff not found'], 404);
+        return response()->json($staff);
     }
 
-    $imagePath = $this->staffImagePath($person);
+    public function apiStaffById($id)
+    {
+        $person = People::with(['designation', 'group', 'post', 'user'])
+            ->where('status', 0)
+            ->where('profile_visible', true)
+            ->where('people_id', $id)
+            ->whereHas('user', function ($query) {
+                $query->where('role', 'staff');
+            })
+            ->first();
 
-    return response()->json([
-        'id' => $person->people_id,
-        'name' => trim($person->fname . ' ' . $person->lname),
-        'email' => $person->email,
-        'bio' => strip_tags($person->biography),
-        'research_interest' => strip_tags($person->research_interest),
-        'about_me' => filled($person->about_me) ? strip_tags($person->about_me) : null,
-        'education' => filled($person->education) ? strip_tags($person->education) : null,
-        'achievements' => filled($person->achievements) ? strip_tags($person->achievements) : null,
-        'certifications' => filled($person->certifications) ? strip_tags($person->certifications) : null,
-        'publications' => filled($person->publications) ? strip_tags($person->publications) : null,
-        'work_experience' => filled($person->work_experience) ? strip_tags($person->work_experience) : null,
-        'projects' => filled($person->projects) ? strip_tags($person->projects) : null,
-        'designation' => $person->designation->designation_name ?? null,
-        'department' => $person->group->name ?? null,
-        'image' => $imagePath ? asset('public/storage/' . $imagePath) : null,
-        'image_path' => $imagePath,
-        'social_links' => array_filter([
-            'linkedin' => $person->linkedin_url,
-            'github' => $person->github_url,
-            'website' => $person->website_url,
-        ], fn ($value) => filled($value)),
-        'bioLink' => '/biographies/' . $person->people_id,
-    ]);
-}
-
-private function staffImagePath(People $person): ?string
-{
-    $profilePhoto = $person->profile_photo_path;
-    if ($profilePhoto) {
-        $relative = str_starts_with($profilePhoto, 'staff-profiles/')
-            ? $profilePhoto
-            : 'staff-profiles/' . basename($profilePhoto);
-
-        if (is_file(public_path('storage/' . $relative))) {
-            return $relative;
+        if (! $person) {
+            return response()->json(['message' => 'Staff not found'], 404);
         }
+
+        $imagePath = $this->staffImagePath($person);
+
+        return response()->json([
+            'id' => $person->people_id,
+            'name' => trim($person->fname . ' ' . $person->lname),
+            'email' => $person->email,
+            'bio' => strip_tags($person->biography),
+            'research_interest' => strip_tags($person->research_interest),
+            'about_me' => filled($person->about_me) ? strip_tags($person->about_me) : null,
+            'education' => filled($person->education) ? strip_tags($person->education) : null,
+            'achievements' => filled($person->achievements) ? strip_tags($person->achievements) : null,
+            'certifications' => filled($person->certifications) ? strip_tags($person->certifications) : null,
+            'publications' => filled($person->publications) ? strip_tags($person->publications) : null,
+            'work_experience' => filled($person->work_experience) ? strip_tags($person->work_experience) : null,
+            'projects' => filled($person->projects) ? strip_tags($person->projects) : null,
+            'designation' => $person->designation->designation_name ?? null,
+            'department' => $person->group->name ?? null,
+            'image' => $imagePath ? asset('public/storage/' . $imagePath) : null,
+            'image_path' => $imagePath,
+            'social_links' => array_filter([
+                'linkedin' => $person->linkedin_url,
+                'github' => $person->github_url,
+                'website' => $person->website_url,
+            ], fn ($value) => filled($value)),
+            'bioLink' => '/biographies/' . $person->people_id,
+        ]);
     }
 
-    if ($person->image_name) {
-        $filename = basename($person->image_name);
-        foreach ([public_path('storage/people/' . $filename), storage_path('app/public/people/' . $filename)] as $path) {
-            if (is_file($path)) {
-                return 'people/' . $filename;
+    private function staffImagePath(People $person): ?string
+    {
+        $profilePhoto = $person->profile_photo_path;
+        if ($profilePhoto) {
+            $relative = str_starts_with($profilePhoto, 'staff-profiles/')
+                ? $profilePhoto
+                : 'staff-profiles/' . basename($profilePhoto);
+
+            if (is_file(public_path('storage/' . $relative))) {
+                return $relative;
             }
         }
+
+        if ($person->image_name) {
+            $filename = basename($person->image_name);
+            foreach ([public_path('storage/people/' . $filename), storage_path('app/public/people/' . $filename)] as $path) {
+                if (is_file($path)) {
+                    return 'people/' . $filename;
+                }
+            }
+        }
+
+        return null;
     }
-
-    return null;
-}
-
-
 }

@@ -35,6 +35,7 @@ export default function Conferences() {
         title="Conferences"
         subtitle="KICS hosts and co-organizes international conferences to advance open science and technology."
         breadcrumbs={[{ label: 'Events' }, { label: 'Conferences' }]}
+        pageKey="conferences"
       />
 
       {/* ICOSST feature */}
