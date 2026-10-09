@@ -89,49 +89,54 @@ class ErpApiController extends Controller
 
         $profiles = People::query()
             ->when(Schema::hasColumn('people', 'profile_visible'), fn ($profiles) => $profiles->where('profile_visible', true))
+            ->where('status', 0)
             ->whereNotNull('email')
             ->get($profileColumns + ['biography', 'research_interest', 'about_me', 'education', 'achievements', 'certifications', 'publications', 'work_experience', 'projects'])
-            ->filter(fn ($person) => !empty(trim((string) $person->email)));
+            ->filter(fn ($person) => $this->personHasPublicProfileData($person));
 
         $profilesByEmail = $profiles->keyBy(fn ($person) => mb_strtolower(trim((string) $person->email)));
         $profilesByName = $profiles->keyBy(fn ($person) => $this->normalizeName((string) ($person->fname ?? '') . ' ' . (string) ($person->lname ?? '')));
 
-        return response()->json($employees->map(function ($employee) use ($profilesByEmail, $profilesByName) {
-            $email = mb_strtolower(trim((string) ($employee->work_email ?? $employee->email ?? '')));
-            $profile = $email !== '' ? ($profilesByEmail->get($email) ?? $this->matchProfileByEmployeeName($employee, $profilesByName)) : $this->matchProfileByEmployeeName($employee, $profilesByName);
-            $photoPath = $profile?->profile_photo_path;
-            $legacyImage = $profile?->image_name;
-            $relativeImage = $photoPath
-                ? (str_starts_with($photoPath, 'staff-profiles/') ? $photoPath : 'staff-profiles/' . basename($photoPath))
-                : ($legacyImage ? 'people/' . basename($legacyImage) : null);
+        return response()->json($employees
+            ->map(function ($employee) use ($profilesByEmail, $profilesByName) {
+                $email = mb_strtolower(trim((string) ($employee->work_email ?? $employee->email ?? '')));
+                $profile = $email !== '' ? ($profilesByEmail->get($email) ?? $this->matchProfileByEmployeeName($employee, $profilesByName)) : $this->matchProfileByEmployeeName($employee, $profilesByName);
+                $photoPath = $profile?->profile_photo_path;
+                $legacyImage = $profile?->image_name;
+                $relativeImage = $photoPath
+                    ? (str_starts_with($photoPath, 'staff-profiles/') ? $photoPath : 'staff-profiles/' . basename($photoPath))
+                    : ($legacyImage ? 'people/' . basename($legacyImage) : null);
 
-            $profilePayload = $profile ? [
-                'people_id' => $profile->people_id,
-                'image_path' => $relativeImage,
-                'bio' => $profile->biography ? strip_tags($profile->biography) : null,
-                'research_interest' => $profile->research_interest ? strip_tags($profile->research_interest) : null,
-                'about_me' => $profile->about_me ? strip_tags($profile->about_me) : null,
-                'education' => $profile->education ? strip_tags($profile->education) : null,
-                'achievements' => $profile->achievements ? strip_tags($profile->achievements) : null,
-                'certifications' => $profile->certifications ? strip_tags($profile->certifications) : null,
-                'publications' => $profile->publications ? strip_tags($profile->publications) : null,
-                'work_experience' => $profile->work_experience ? strip_tags($profile->work_experience) : null,
-                'projects' => $profile->projects ? strip_tags($profile->projects) : null,
-            ] : null;
+                $profilePayload = $profile ? [
+                    'people_id' => $profile->people_id,
+                    'email' => $profile->email,
+                    'image_path' => $relativeImage,
+                    'bio' => $profile->biography ? strip_tags($profile->biography) : null,
+                    'research_interest' => $profile->research_interest ? strip_tags($profile->research_interest) : null,
+                    'about_me' => $profile->about_me ? strip_tags($profile->about_me) : null,
+                    'education' => $profile->education ? strip_tags($profile->education) : null,
+                    'achievements' => $profile->achievements ? strip_tags($profile->achievements) : null,
+                    'certifications' => $profile->certifications ? strip_tags($profile->certifications) : null,
+                    'publications' => $profile->publications ? strip_tags($profile->publications) : null,
+                    'work_experience' => $profile->work_experience ? strip_tags($profile->work_experience) : null,
+                    'projects' => $profile->projects ? strip_tags($profile->projects) : null,
+                ] : null;
 
-            return array_merge($employee->toArray(), [
-                'bio' => $profilePayload['bio'] ?? $employee->bio ?? null,
-                'research_interest' => $profilePayload['research_interest'] ?? $employee->research_interest ?? null,
-                'about_me' => $profilePayload['about_me'] ?? $employee->about_me ?? null,
-                'education' => $profilePayload['education'] ?? $employee->education ?? null,
-                'achievements' => $profilePayload['achievements'] ?? $employee->achievements ?? null,
-                'certifications' => $profilePayload['certifications'] ?? $employee->certifications ?? null,
-                'publications' => $profilePayload['publications'] ?? $employee->publications ?? null,
-                'work_experience' => $profilePayload['work_experience'] ?? $employee->work_experience ?? null,
-                'projects' => $profilePayload['projects'] ?? $employee->projects ?? null,
-                'profile' => $profilePayload,
-            ]);
-        }));
+                return array_merge($employee->toArray(), [
+                    'bio' => $profilePayload['bio'] ?? $employee->bio ?? null,
+                    'research_interest' => $profilePayload['research_interest'] ?? $employee->research_interest ?? null,
+                    'about_me' => $profilePayload['about_me'] ?? $employee->about_me ?? null,
+                    'education' => $profilePayload['education'] ?? $employee->education ?? null,
+                    'achievements' => $profilePayload['achievements'] ?? $employee->achievements ?? null,
+                    'certifications' => $profilePayload['certifications'] ?? $employee->certifications ?? null,
+                    'publications' => $profilePayload['publications'] ?? $employee->publications ?? null,
+                    'work_experience' => $profilePayload['work_experience'] ?? $employee->work_experience ?? null,
+                    'projects' => $profilePayload['projects'] ?? $employee->projects ?? null,
+                    'profile' => $profilePayload,
+                ]);
+            })
+            ->filter(fn ($employee) => !empty($employee['profile']))
+            ->values());
     }
 
     protected function normalizeName(string $value): string
@@ -141,6 +146,17 @@ class ErpApiController extends Controller
         $value = preg_replace('/\s+/', ' ', trim((string) $value));
 
         return $value;
+    }
+
+    protected function personHasPublicProfileData($person): bool
+    {
+        foreach (['email', 'biography', 'research_interest', 'about_me', 'education', 'achievements', 'certifications', 'publications', 'work_experience', 'projects', 'profile_photo_path', 'image_name'] as $field) {
+            if (filled($person->{$field} ?? null)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected function matchProfileByEmployeeName($employee, $profilesByName)

@@ -8,18 +8,22 @@ import { erpService } from '../services';
 import employeesBanner from '../assets/images/kics-employees-banner.jpg';
 import { buildImageUrl } from '../utils/image';
 
-const mapEmployee = (employee) => ({
-  id: employee.id,
-  name: employee.complete_name || employee.name || 'Unnamed Staff',
-  title: employee.job_title || 'Staff Member',
-  department: employee.department || 'General',
-  email: employee.work_email || employee.email || '',
-  bio: employee.profile?.bio || employee.bio || '',
-  image: buildImageUrl(employee.profile?.image_path || employee.image, ''),
-  profileId: employee.profile?.people_id || null,
-  aboutMe: employee.profile?.about_me || employee.about_me || '',
-  education: employee.profile?.education || employee.education || '',
-});
+const mapEmployee = (employee) => {
+  const contactEmail = employee.profile?.email || employee.work_email || employee.email || '';
+
+  return {
+    id: employee.id,
+    name: employee.complete_name || employee.name || 'Unnamed Staff',
+    title: employee.job_title || 'Staff Member',
+    department: employee.department || 'General',
+    email: contactEmail,
+    bio: employee.profile?.bio || employee.bio || '',
+    image: buildImageUrl(employee.profile?.image_path || employee.image, ''),
+    profileId: employee.profile?.people_id || null,
+    aboutMe: employee.profile?.about_me || employee.about_me || '',
+    education: employee.profile?.education || employee.education || '',
+  };
+};
 
 function EmployeeAvatar({ image, name }) {
   const [imageFailed, setImageFailed] = useState(false);
@@ -271,7 +275,7 @@ export default function ErpEmployees() {
                                 View Profile
                               </Link>
                             )}
-                            {employee.email && (
+                            {employee.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(employee.email) && (
                               <a href={`mailto:${employee.email}`} className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 transition-all shadow-sm">
                                 <FiMail size={14} /> Email
                               </a>
